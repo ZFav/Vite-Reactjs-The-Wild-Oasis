@@ -1,0 +1,10 @@
+Style component
+libreria da imparare per stile.
+
+npm i styled-components
+
+const H1 = styled.h1`
+  font-size: 30px;
+  font-weight: 600;
+`;
+scrivere direttamente dentro il componente 
