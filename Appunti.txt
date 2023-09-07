@@ -8,3 +8,52 @@ const H1 = styled.h1`
   font-weight: 600;
 `;
 scrivere direttamente dentro il componente 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+npm i --save-dev vite-plugin-eslint eslint-config-react-app eslint
+creare .eslintrc.json aggiungere { "extends": "react-app" }
+nel vite.config.js aggiungere import eslint from "vite-plugin-eslint"; nel plugins: [react(),eslint()],
+
+react router 
+npm i react-router-dom@6
+
+
+react icons
+npm i react-icons    
