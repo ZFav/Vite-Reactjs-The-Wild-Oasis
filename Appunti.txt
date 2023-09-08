@@ -10,7 +10,14 @@ const H1 = styled.h1`
 scrivere direttamente dentro il componente 
 
 
+SUPABASE
 
+ npm i --save @supabase/supabase-js
+
+
+
+
+ REACT QUERY
 
 
 
