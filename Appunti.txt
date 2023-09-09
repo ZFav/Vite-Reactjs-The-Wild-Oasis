@@ -19,14 +19,56 @@ SUPABASE
 
  REACT QUERY
 
+npm i @tanstack/react-query@4
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+    },
+  },
+});
+
+queryclient nell app.jsx permette di iniziare la query e scegliere il timer da rendere il prodotto invalido cosicche lo refecha
+
+questi due sono quelli che devono essere messi dentro la app.jsx
+<QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools initialIsOpen={false} />
+
+ npm i @tanstack/react-query-devtools
+
+
+per usare le query 
+
+const {
+    isLoading,
+    data: cabins,
+    
+  } = useQuery({
+    queryKey: ["cabin"],
+    queryFn: getCabins,
+  });
+
+cosiche li prende e fa la funzione, la queryfn prende la fx del getCabins dal api
+
+per mutare le query
+
+ const { isloading: isDeleting, mutate } = useMutation({
+    mutationFn: (id) => deleteCabins(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cabin"] });
+    },
+  });
+
+questo ci permette di chiamare il hook iniziale, e di poter mutarlo 
+const queryClient= useQueryClient()
 
 
 
 
+npm i react-hot-toast  per le notification
 
-
-
-
+va nel app.jsx
 
 
 
