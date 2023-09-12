@@ -75,8 +75,150 @@ va nel app.jsx
 
 
 
+npm i react-hook-form@7
+
+per salvare velomente di dati form
+
+function CreateCabinForm() {
+  const { register, handleSubmit, reset, getValues, formState } = useForm();
+
+  const { errors } = formState;
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isLoadin: isCreating } = useMutation({
+    // mutationfn: (newCabin) => createCabin(newCabin),
+    mutationFn: createCabin,
+    onSuccess: () => {
+      toast.success("New cabin Created");
+      queryClient.invalidateQueries({ queryKey: ["cabins"] });
+      reset();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  function onSubmitFormCabin(data) {
+    mutate(data);
+  }
+
+  function onError(errors) {
+    console.log(errors);
+  }
+
+  return (
+    <Form onSubmit={handleSubmit(onSubmitFormCabin, onError)}>
+      <FormRow label="name" error={errors?.name?.message}>
+        <Input
+          type="text"
+          id="name"
+          {...register("name", { required: "This field is required" })}
+        />
+      </FormRow>
+
+  questo ci permette di rendere l'hook molto semplice
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+create e Edit
+export async function createEditCabin(newCabin, id) {
+  const hasImagePath = newCabin.image?.startsWith?.(supabaseUrl); //per vedere se esiste gia il file
+
+  // "/","" affinche non crea sottocartelle
+  const imageName = `${Math.random()}-${newCabin.image.name}`.replaceAll(
+    "/",
+    ""
+  );
+  const imagePath = hasImagePath
+    ? newCabin.image
+    : `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`;
+
+  // 1. Create cabin old style
+  /*const { data, error } = await supabase
+    .from("cabins")  questo verra sostuito dalla query creato sopra 
+    .insert([{ ...newCabin, image: imagePath }])
+    .select()
+    .single();*/
+
+  //1. Create/edit
+  let query = supabase.from("cabins");
+
+  // A) Create
+  if (!id) query = query.insert([{ ...newCabin, image: imagePath }]);
+
+  //B) Edit
+  if (id) query = query.update({ ...newCabin, image: imagePath }).eq("id", id);
+
+  const { data, error } = await query.select().single();
+
+  if (error) {
+    console.error(error);
+    throw new Error("Cabins could not be Created");
+  }
+
+  //2. Upload Image
+
+  const { error: storageError } = await supabase.storage
+    .from("cabin-images")
+    .upload(imageName, newCabin.image);
+
+  //3 . Delete the cabin if there was a error uploading image
+
+  if (storageError) {
+    await supabase.from("cabins").delete().eq("id", data.id);
+    console.error(storageError);
+    throw new Error("Cabins image could not be Uploaded, cabin not created");
+  }
+  return data;
+}
+
+
+const queryClient = useQueryClient();
+
+  const { mutate: createCabin, isLoading: isCreating } = useMutation({
+    // mutationfn: (newCabin) => createCabin(newCabin),
+    mutationFn: createEditCabin,
+    onSuccess: () => {
+      toast.success("New cabin Created");
+      queryClient.invalidateQueries({ queryKey: ["cabins"] });
+      reset();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const { mutate: editCabin, isLoading: isEditing } = useMutation({
+    // mutationfn: (newCabin) => createCabin(newCabin),
+    mutationFn: ({ newCabinData, id }) => createEditCabin(newCabinData, id),
+    onSuccess: () => {
+      toast.success("Cabin Updated");
+      queryClient.invalidateQueries({ queryKey: ["cabins"] });
+      reset();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const isWorking = isCreating || isEditing;
+
+  function onSubmitFormCabin(data) {
+    const image = typeof data.image === "string" ? data.image : data.image[0];
+
+    if (isEditSession)
+      editCabin({ newCabinData: { ...data, image }, id: editId });
+    else createCabin({ ...data, image: data.image });
+  }
 
 
 
